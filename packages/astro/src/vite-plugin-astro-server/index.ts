@@ -246,7 +246,6 @@ async function handleRequest(
 	req: http.IncomingMessage,
 	res: http.ServerResponse
 ) {
-	const reqStart = performance.now();
 	const origin = `${viteServer.config.server.https ? 'https' : 'http'}://${req.headers.host}`;
 	const buildingToSSR = config.output === 'server';
 	// Ignore `.html` extensions and `index.html` in request URLS to ensure that
@@ -292,6 +291,7 @@ async function handleRequest(
 	return handleRoute(
 		matchedRoute,
 		url,
+		pathname,
 		body,
 		origin,
 		routeCache,
@@ -307,6 +307,7 @@ async function handleRequest(
 async function handleRoute(
 	matchedRoute: AsyncReturnType<typeof matchRoute>,
 	url: URL,
+	pathname: string,
 	body: ArrayBuffer | undefined,
 	origin: string,
 	routeCache: RouteCache,
@@ -326,7 +327,6 @@ async function handleRoute(
 		filePath = matchedRoute.filePath;
 		const { route, preloadedComponent, mod } = matchedRoute;
 		const buildingToSSR = config.output === 'server';
-		const pathname = decodeURI(url.pathname);
 
 		// Headers are only available when using SSR.
 		const request = createRequest({
@@ -379,6 +379,7 @@ async function handleRoute(
 					return handleRoute(
 						fourOhFourRoute,
 						new URL('/404', url),
+						'/404',
 						body,
 						origin,
 						routeCache,
